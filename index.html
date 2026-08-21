@@ -22,7 +22,6 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
         }
 
-        /* Phân bổ độ rộng cột: 52% - 38% - 10% */
         .calc-table col.col-label { width: 52%; }
         .calc-table col.col-value { width: 38%; }
         .calc-table col.col-unit { width: 10%; }
@@ -79,7 +78,6 @@
             border-bottom: 1px solid #0070c0; 
         }
 
-        /* Ô kết quả màu đỏ */
         .result-red { 
             background-color: #ff0000; 
             color: white; 
@@ -121,7 +119,7 @@
     <tbody>
         <tr>
             <td class="label">Đường kính ống (mm)</td>
-            <td class="input-cell" colspan="2"><input type="number" id="diameter" value="400" oninput="calculate()"></td>
+            <td class="input-cell" colspan="2"><input type="number" id="diameter" value="200" oninput="calculate()"></td>
         </tr>
         <tr>
             <td class="label">Chiều dài ống (m)</td>
@@ -187,30 +185,36 @@ function calculate() {
     let C = parseFloat(document.getElementById('material').value) || 140;
 
     let D_m = d / 1000;
-    let Hf = pStart - pEnd; // Tổn thất áp lực (m)
+    let deltaP = pStart - pEnd; 
 
     let Q_m3s = 0;
     let Q_m3h = 0;
     let velocity = 0;
+    let Hf = 0;
 
-    if (L > 0 && D_m > 0 && C > 0 && Hf > 0) {
-        // Công thức Hazen-Williams giải ngược tìm Q (m3/s):
-        // Hf = 10.67 * L * Q^1.852 / (C^1.852 * D^4.87)
-        // => Q = [ (Hf * C^1.852 * D^4.87) / (10.67 * L) ] ^ (1 / 1.852)
-        let numerator = Hf * Math.pow(C, 1.852) * Math.pow(D_m, 4.87);
-        let denominator = 10.67 * L;
+    if (L > 0 && D_m > 0 && C > 0 && deltaP > 0) {
+        // Hệ số 11.737 = 10.67 * 1.10 (đã cộng 10% tổn thất cục bộ)
+        let K = 11.737;
+
+        // 1. Tính Q từ Hazen-Williams giải ngược
+        let numerator = deltaP * Math.pow(C, 1.852) * Math.pow(D_m, 4.87);
+        let denominator = K * L;
         Q_m3s = Math.pow(numerator / denominator, 1 / 1.852);
         
         Q_m3h = Q_m3s * 3600;
 
+        // 2. Vận tốc dòng chảy
         let area = Math.PI * Math.pow(D_m / 2, 2);
         velocity = Q_m3s / area;
+
+        // 3. Tính tổng tổn thất thủy lực (bao gồm tổn thất cục bộ)
+        Hf = K * L * Math.pow(Q_m3s, 1.852) / (Math.pow(C, 1.852) * Math.pow(D_m, 4.87));
     }
 
     document.getElementById('q_m3s').innerText = Q_m3s.toFixed(5);
     document.getElementById('q_m3h').innerText = Q_m3h.toFixed(2);
     document.getElementById('velocity').innerText = velocity.toFixed(2);
-    document.getElementById('hf').innerText = Hf > 0 ? Hf.toFixed(2) : "0.00";
+    document.getElementById('hf').innerText = Hf.toFixed(2);
 }
 
 calculate();
