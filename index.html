@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính Toán Lưu Lượng Nước</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 500px; 
+            margin: 20px auto; 
+            padding: 10px; 
+            background-color: #f4f6f9; 
+        }
+        
+        .calc-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background-color: white; 
+            border: 2px solid #0070c0; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
+        }
+
+        /* Phân bổ độ rộng cột: 52% - 38% - 10% */
+        .calc-table col.col-label { width: 52%; }
+        .calc-table col.col-value { width: 38%; }
+        .calc-table col.col-unit { width: 10%; }
+
+        .header { 
+            background-color: #0070c0; 
+            color: white; 
+            text-align: center; 
+            font-weight: bold; 
+            padding: 12px; 
+            font-size: 16px; 
+            text-transform: uppercase; 
+        }
+
+        .label { 
+            background-color: #0070c0; 
+            color: white; 
+            padding: 8px 10px; 
+            font-size: 14px; 
+            font-weight: 500; 
+            border-bottom: 1px solid #ffffff; 
+            vertical-align: middle;
+        }
+
+        .input-cell { 
+            padding: 4px 5px; 
+            background-color: #ffff00; 
+            border-bottom: 1px solid #0070c0; 
+            vertical-align: middle;
+        }
+
+        input, select { 
+            width: 100%; 
+            padding: 6px; 
+            box-sizing: border-box; 
+            text-align: right; 
+            font-weight: bold; 
+            border: 1px solid #a6a6a6; 
+            border-radius: 3px; 
+            font-size: 14px; 
+            color: #000; 
+            background-color: #ffff00;
+        }
+        select { text-align-last: right; }
+
+        .section-title { 
+            background-color: #ffff00; 
+            color: black; 
+            font-weight: bold; 
+            text-align: center; 
+            padding: 8px; 
+            font-size: 15px; 
+            border-top: 1px solid #0070c0; 
+            border-bottom: 1px solid #0070c0; 
+        }
+
+        /* Ô kết quả màu đỏ */
+        .result-red { 
+            background-color: #ff0000; 
+            color: white; 
+            text-align: right; 
+            font-weight: bold; 
+            padding: 8px 10px; 
+            font-size: 14px; 
+            border-bottom: 2px solid #ffffff; 
+            white-space: nowrap;
+        }
+
+        .unit-cell {
+            background-color: #0070c0;
+            color: white;
+            font-size: 13px;
+            padding: 8px 4px;
+            text-align: center;
+            border-bottom: 1px solid #ffffff;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+<table class="calc-table">
+    <colgroup>
+        <col class="col-label">
+        <col class="col-value">
+        <col class="col-unit">
+    </colgroup>
+    <thead>
+        <tr>
+            <th colspan="3" class="header">TÍNH TOÁN LƯU LƯỢNG NƯỚC</th>
+        </tr>
+        <tr>
+            <th colspan="3" class="section-title">DỮ LIỆU ĐẦU VÀO</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="label">Đường kính ống (mm)</td>
+            <td class="input-cell" colspan="2"><input type="number" id="diameter" value="400" oninput="calculate()"></td>
+        </tr>
+        <tr>
+            <td class="label">Chiều dài ống (m)</td>
+            <td class="input-cell" colspan="2"><input type="number" id="length" value="18750" oninput="calculate()"></td>
+        </tr>
+        <tr>
+            <td class="label">Áp lực điểm đầu (m)</td>
+            <td class="input-cell" colspan="2"><input type="number" id="pStart" value="30" oninput="calculate()"></td>
+        </tr>
+        <tr>
+            <td class="label">Áp lực điểm cuối (m)</td>
+            <td class="input-cell" colspan="2"><input type="number" id="pEnd" value="15" oninput="calculate()"></td>
+        </tr>
+        <tr>
+            <td class="label">Vật liệu đường ống</td>
+            <td class="input-cell" colspan="2">
+                <select id="material" onchange="calculate()">
+                    <option value="150">Ống PVC (C = 150)</option>
+                    <option value="140" selected>Ống HDPE (C = 140)</option>
+                    <option value="130">Ống gang dẻo mới - DIP (C = 130)</option>
+                    <option value="120">Ống gang dẻo phục hồi - DIP_R (C = 120)</option>
+                    <option value="120">Ống thép mới - SP_N (C = 120)</option>
+                    <option value="110">Ống thép phục hồi - SP_R (C = 110)</option>
+                    <option value="90">Ống thép cũ - SP_O (C = 90)</option>
+                    <option value="140">Ống Inox - INOX (C = 140)</option>
+                    <option value="110">Ống gang xám - CIP (C = 110)</option>
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="3" class="section-title">KẾT QUẢ</td>
+        </tr>
+
+        <tr>
+            <td class="label" rowspan="2" style="vertical-align: middle;">Lưu lượng qua đường ống</td>
+            <td class="result-red"><span id="q_m3s">0.00000</span></td>
+            <td class="unit-cell">(m³/s)</td>
+        </tr>
+        <tr>
+            <td class="result-red"><span id="q_m3h">0.00</span></td>
+            <td class="unit-cell">(m³/h)</td>
+        </tr>
+        <tr>
+            <td class="label">Vận tốc trong đường ống</td>
+            <td class="result-red"><span id="velocity">0.00</span></td>
+            <td class="unit-cell">(m/s)</td>
+        </tr>
+        <tr>
+            <td class="label">Tổn thất thủy lực (toàn tuyến)</td>
+            <td class="result-red"><span id="hf">0.00</span></td>
+            <td class="unit-cell">(m)</td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+function calculate() {
+    let d = parseFloat(document.getElementById('diameter').value) || 0;
+    let L = parseFloat(document.getElementById('length').value) || 0;
+    let pStart = parseFloat(document.getElementById('pStart').value) || 0;
+    let pEnd = parseFloat(document.getElementById('pEnd').value) || 0;
+    let C = parseFloat(document.getElementById('material').value) || 140;
+
+    let D_m = d / 1000;
+    let Hf = pStart - pEnd; // Tổn thất áp lực (m)
+
+    let Q_m3s = 0;
+    let Q_m3h = 0;
+    let velocity = 0;
+
+    if (L > 0 && D_m > 0 && C > 0 && Hf > 0) {
+        // Công thức Hazen-Williams giải ngược tìm Q (m3/s):
+        // Hf = 10.67 * L * Q^1.852 / (C^1.852 * D^4.87)
+        // => Q = [ (Hf * C^1.852 * D^4.87) / (10.67 * L) ] ^ (1 / 1.852)
+        let numerator = Hf * Math.pow(C, 1.852) * Math.pow(D_m, 4.87);
+        let denominator = 10.67 * L;
+        Q_m3s = Math.pow(numerator / denominator, 1 / 1.852);
+        
+        Q_m3h = Q_m3s * 3600;
+
+        let area = Math.PI * Math.pow(D_m / 2, 2);
+        velocity = Q_m3s / area;
+    }
+
+    document.getElementById('q_m3s').innerText = Q_m3s.toFixed(5);
+    document.getElementById('q_m3h').innerText = Q_m3h.toFixed(2);
+    document.getElementById('velocity').innerText = velocity.toFixed(2);
+    document.getElementById('hf').innerText = Hf > 0 ? Hf.toFixed(2) : "0.00";
+}
+
+calculate();
+</script>
+
+</body>
+</html>
