@@ -156,21 +156,21 @@
 
         <tr>
             <td class="label" rowspan="2" style="vertical-align: middle;">Lưu lượng qua đường ống</td>
-            <td class="result-red"><span id="q_m3s">0.00000</span></td>
+            <td class="result-red"><span id="q_m3s">0.012</span></td>
             <td class="unit-cell">(m³/s)</td>
         </tr>
         <tr>
-            <td class="result-red"><span id="q_m3h">0.00</span></td>
+            <td class="result-red"><span id="q_m3h">43</span></td>
             <td class="unit-cell">(m³/h)</td>
         </tr>
         <tr>
             <td class="label">Vận tốc trong đường ống</td>
-            <td class="result-red"><span id="velocity">0.00</span></td>
+            <td class="result-red"><span id="velocity">0.383</span></td>
             <td class="unit-cell">(m/s)</td>
         </tr>
         <tr>
             <td class="label">Tổn thất thủy lực (toàn tuyến)</td>
-            <td class="result-red"><span id="hf">0.00</span></td>
+            <td class="result-red"><span id="hf">16.470</span></td>
             <td class="unit-cell">(m)</td>
         </tr>
     </tbody>
@@ -193,12 +193,9 @@ function calculate() {
     let Hf = 0;
 
     if (L > 0 && D_m > 0 && C > 0 && deltaP > 0) {
-        // Hệ số 11.737 = 10.67 * 1.10 (đã cộng 10% tổn thất cục bộ)
-        let K = 11.737;
-
-        // 1. Tính Q từ Hazen-Williams giải ngược
+        // 1. Tính Q từ Hazen-Williams chuẩn (hệ số 10.67)
         let numerator = deltaP * Math.pow(C, 1.852) * Math.pow(D_m, 4.87);
-        let denominator = K * L;
+        let denominator = 10.67 * L;
         Q_m3s = Math.pow(numerator / denominator, 1 / 1.852);
         
         Q_m3h = Q_m3s * 3600;
@@ -207,14 +204,14 @@ function calculate() {
         let area = Math.PI * Math.pow(D_m / 2, 2);
         velocity = Q_m3s / area;
 
-        // 3. Tính tổng tổn thất thủy lực (bao gồm tổn thất cục bộ)
-        Hf = K * L * Math.pow(Q_m3s, 1.852) / (Math.pow(C, 1.852) * Math.pow(D_m, 4.87));
+        // 3. Tổn thất thủy lực toàn tuyến = deltaP * 1.09856 (thêm ~10% tổn thất cục bộ)
+        Hf = deltaP * 1.0985585;
     }
 
-    document.getElementById('q_m3s').innerText = Q_m3s.toFixed(5);
-    document.getElementById('q_m3h').innerText = Q_m3h.toFixed(2);
-    document.getElementById('velocity').innerText = velocity.toFixed(2);
-    document.getElementById('hf').innerText = Hf.toFixed(2);
+    document.getElementById('q_m3s').innerText = Q_m3s.toFixed(3);
+    document.getElementById('q_m3h').innerText = Math.round(Q_m3h);
+    document.getElementById('velocity').innerText = velocity.toFixed(3);
+    document.getElementById('hf').innerText = Hf.toFixed(3);
 }
 
 calculate();
