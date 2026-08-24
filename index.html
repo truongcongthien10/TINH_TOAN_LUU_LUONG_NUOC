@@ -2,219 +2,299 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tính Toán Lưu Lượng Nước</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tính Toán Lưu Lượng Nước - 2026</title>
     <style>
-        * { box-sizing: border-box; }
-        body { 
-            font-family: Arial, sans-serif; 
-            max-width: 500px; 
-            margin: 20px auto; 
-            padding: 10px; 
-            background-color: #f4f6f9; 
-        }
-        
-        .calc-table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            background-color: white; 
-            border: 2px solid #0070c0; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
+        :root {
+            --excel-header-bg: #107c41;
+            --excel-header-text: #ffffff;
+            --section-title: #0f5257;
+            --bg-color: #f0f4f1;
+            --card-bg: #ffffff;
+            --input-bg: #f9fbf9;
+            --border-color: #c8d6c9;
+            --accent-blue: #005a9e;
+            --btn-blue: rgb(0, 112, 192);
+            --result-bg: #eef7ee;
         }
 
-        .calc-table col.col-label { width: 52%; }
-        .calc-table col.col-value { width: 38%; }
-        .calc-table col.col-unit { width: 10%; }
-
-        .header { 
-            background-color: #0070c0; 
-            color: white; 
-            text-align: center; 
-            font-weight: bold; 
-            padding: 12px; 
-            font-size: 16px; 
-            text-transform: uppercase; 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        .label { 
-            background-color: #0070c0; 
-            color: white; 
-            padding: 8px 10px; 
-            font-size: 14px; 
-            font-weight: 500; 
-            border-bottom: 1px solid #ffffff; 
-            vertical-align: middle;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: #242424;
+            padding: 10px;
         }
 
-        .input-cell { 
-            padding: 4px 5px; 
-            background-color: #ffff00; 
-            border-bottom: 1px solid #0070c0; 
-            vertical-align: middle;
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
         }
 
-        input, select { 
-            width: 100%; 
-            padding: 6px; 
-            box-sizing: border-box; 
-            text-align: right; 
-            font-weight: bold; 
-            border: 1px solid #a6a6a6; 
-            border-radius: 3px; 
-            font-size: 14px; 
-            color: #000; 
-            background-color: #ffff00;
-        }
-        select { text-align-last: right; }
-
-        .section-title { 
-            background-color: #ffff00; 
-            color: black; 
-            font-weight: bold; 
-            text-align: center; 
-            padding: 8px; 
-            font-size: 15px; 
-            border-top: 1px solid #0070c0; 
-            border-bottom: 1px solid #0070c0; 
-        }
-
-        .result-red { 
-            background-color: #ff0000; 
-            color: white; 
-            text-align: right; 
-            font-weight: bold; 
-            padding: 8px 10px; 
-            font-size: 14px; 
-            border-bottom: 2px solid #ffffff; 
-            white-space: nowrap;
-        }
-
-        .unit-cell {
-            background-color: #0070c0;
-            color: white;
-            font-size: 13px;
-            padding: 8px 4px;
+        .header-bar {
+            background-color: var(--excel-header-bg);
+            color: var(--excel-header-text);
             text-align: center;
-            border-bottom: 1px solid #ffffff;
-            vertical-align: middle;
+            padding: 12px 10px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .content {
+            padding: 12px 15px;
+        }
+
+        .section-title {
+            font-weight: 700;
+            color: var(--section-title);
+            border-bottom: 2px solid var(--excel-header-bg);
+            padding-bottom: 3px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 10px;
+        }
+
+        @media (max-width: 480px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.8rem;
+            margin-bottom: 2px;
+            font-weight: 600;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        input, select {
+            padding: 6px 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            outline: none;
+            width: 100%;
+            height: 34px;
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--excel-header-bg);
+            background-color: #fff;
+            box-shadow: 0 0 0 2px rgba(16, 124, 65, 0.15);
+        }
+
+        .btn-calc {
+            width: 100%;
+            background-color: var(--btn-blue);
+            color: #ffffff;
+            border: none;
+            padding: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 12px;
+            margin-bottom: 5px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-calc:active {
+            opacity: 0.85;
+        }
+
+        .result-box {
+            background-color: var(--result-bg);
+            border: 1px solid #c3e6c5;
+            border-left: 4px solid var(--excel-header-bg);
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px dashed #d0e4d2;
+            font-size: 0.85rem;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: #2e4d32;
+            font-weight: 500;
+        }
+
+        .result-value-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+
+        .result-value {
+            font-weight: 700;
+            color: var(--accent-blue);
+            font-size: 0.9rem;
+        }
+
+        .highlight-main {
+            color: #d83b01;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .highlight-sub {
+            color: #d83b01;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
 
-<table class="calc-table">
-    <colgroup>
-        <col class="col-label">
-        <col class="col-value">
-        <col class="col-unit">
-    </colgroup>
-    <thead>
-        <tr>
-            <th colspan="3" class="header">TÍNH TOÁN LƯU LƯỢNG NƯỚC</th>
-        </tr>
-        <tr>
-            <th colspan="3" class="section-title">DỮ LIỆU ĐẦU VÀO</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td class="label">Đường kính ống (mm)</td>
-            <td class="input-cell" colspan="2"><input type="number" id="diameter" value="200" oninput="calculate()"></td>
-        </tr>
-        <tr>
-            <td class="label">Chiều dài ống (m)</td>
-            <td class="input-cell" colspan="2"><input type="number" id="length" value="18750" oninput="calculate()"></td>
-        </tr>
-        <tr>
-            <td class="label">Áp lực điểm đầu (m)</td>
-            <td class="input-cell" colspan="2"><input type="number" id="pStart" value="30" oninput="calculate()"></td>
-        </tr>
-        <tr>
-            <td class="label">Áp lực điểm cuối (m)</td>
-            <td class="input-cell" colspan="2"><input type="number" id="pEnd" value="15" oninput="calculate()"></td>
-        </tr>
-        <tr>
-            <td class="label">Vật liệu đường ống</td>
-            <td class="input-cell" colspan="2">
-                <select id="material" onchange="calculate()">
-                    <option value="150">Ống PVC (C = 150)</option>
+<div class="container">
+    <div class="header-bar">TÍNH TOÁN LƯU LƯỢNG NƯỚC - 2026</div>
+    
+    <div class="content">
+        <div class="section-title">Dữ Liệu Đầu Vào</div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="d_mm">Đường kính ống (mm):</label>
+                <input type="number" id="d_mm" value="200" inputmode="decimal">
+            </div>
+            <div class="form-group">
+                <label for="length">Chiều dài ống L (m):</label>
+                <input type="number" id="length" value="18750" inputmode="decimal">
+            </div>
+            <div class="form-group">
+                <label for="h_head">Áp lực điểm đầu (m):</label>
+                <input type="number" id="h_head" value="30" inputmode="decimal">
+            </div>
+            <div class="form-group">
+                <label for="h_tail">Áp lực điểm cuối (m):</label>
+                <input type="number" id="h_tail" value="15" inputmode="decimal">
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+                <label for="material">Vật liệu đường ống:</label>
+                <select id="material">
                     <option value="140" selected>Ống HDPE (C = 140)</option>
-                    <option value="130">Ống gang dẻo mới - DIP (C = 130)</option>
-                    <option value="120">Ống gang dẻo phục hồi - DIP_R (C = 120)</option>
-                    <option value="120">Ống thép mới - SP_N (C = 120)</option>
-                    <option value="110">Ống thép phục hồi - SP_R (C = 110)</option>
-                    <option value="90">Ống thép cũ - SP_O (C = 90)</option>
-                    <option value="140">Ống Inox - INOX (C = 140)</option>
-                    <option value="110">Ống gang xám - CIP (C = 110)</option>
+                    <option value="140">Ống PVC (C = 140)</option>
+                    <option value="140">Ống Inox (C = 140)</option>
+                    <option value="130">Ống gang dẻo mới (C = 130)</option>
+                    <option value="120">Ống gang dẻo phục hồi (C = 120)</option>
+                    <option value="120">Ống thép mới (C = 120)</option>
+                    <option value="110">Ống thép phục hồi (C = 110)</option>
+                    <option value="90">Ống thép cũ (C = 90)</option>
+                    <option value="110">Ống gang xám (C = 110)</option>
                 </select>
-            </td>
-        </tr>
+            </div>
+        </div>
 
-        <tr>
-            <td colspan="3" class="section-title">KẾT QUẢ</td>
-        </tr>
+        <button class="btn-calc" onclick="calculateFlowRate()">Cập Nhật Tính Toán</button>
 
-        <tr>
-            <td class="label" rowspan="2" style="vertical-align: middle;">Lưu lượng qua đường ống</td>
-            <td class="result-red"><span id="q_m3s">0.012</span></td>
-            <td class="unit-cell">(m³/s)</td>
-        </tr>
-        <tr>
-            <td class="result-red"><span id="q_m3h">43</span></td>
-            <td class="unit-cell">(m³/h)</td>
-        </tr>
-        <tr>
-            <td class="label">Vận tốc trong đường ống</td>
-            <td class="result-red"><span id="velocity">0.383</span></td>
-            <td class="unit-cell">(m/s)</td>
-        </tr>
-        <tr>
-            <td class="label">Tổn thất thủy lực (toàn tuyến)</td>
-            <td class="result-red"><span id="hf">16.470</span></td>
-            <td class="unit-cell">(m)</td>
-        </tr>
-    </tbody>
-</table>
+        <div class="section-title">Kết Quả Tính Toán</div>
+        <div class="result-box">
+            <div class="result-item">
+                <span class="result-label">Lưu lượng qua đường ống (Q):</span>
+                <div class="result-value-group">
+                    <span id="res_q_m3h" class="highlight-main">- m³/h</span>
+                    <span id="res_q_m3s" class="highlight-sub">(- m³/s)</span>
+                </div>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Vận tốc trong đường ống:</span>
+                <span class="result-value" id="res_v">- m/s</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Tổn thất thủy lực (toàn tuyến):</span>
+                <span class="result-value" id="res_hf">- m</span>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-function calculate() {
-    let d = parseFloat(document.getElementById('diameter').value) || 0;
-    let L = parseFloat(document.getElementById('length').value) || 0;
-    let pStart = parseFloat(document.getElementById('pStart').value) || 0;
-    let pEnd = parseFloat(document.getElementById('pEnd').value) || 0;
-    let C = parseFloat(document.getElementById('material').value) || 140;
+    function calculateFlowRate() {
+        const dMm = parseFloat(document.getElementById('d_mm').value) || 0;
+        const L = parseFloat(document.getElementById('length').value) || 0;
+        const hHead = parseFloat(document.getElementById('h_head').value) || 0;
+        const hTail = parseFloat(document.getElementById('h_tail').value) || 0;
+        const C = parseFloat(document.getElementById('material').value) || 140;
 
-    let D_m = d / 1000;
-    let deltaP = pStart - pEnd; 
+        const deltaH = hHead - hTail;
 
-    let Q_m3s = 0;
-    let Q_m3h = 0;
-    let velocity = 0;
-    let Hf = 0;
+        if (dMm <= 0 || L <= 0 || deltaH <= 0) {
+            document.getElementById('res_q_m3h').innerText = "Không hợp lệ";
+            document.getElementById('res_q_m3s').innerText = "(- m³/s)";
+            document.getElementById('res_v').innerText = "- m/s";
+            document.getElementById('res_hf').innerText = "- m";
+            return;
+        }
 
-    if (L > 0 && D_m > 0 && C > 0 && deltaP > 0) {
-        // 1. Tính Q từ Hazen-Williams chuẩn (hệ số 10.67)
-        let numerator = deltaP * Math.pow(C, 1.852) * Math.pow(D_m, 4.87);
-        let denominator = 10.67 * L;
-        Q_m3s = Math.pow(numerator / denominator, 1 / 1.852);
-        
-        Q_m3h = Q_m3s * 3600;
+        const dM = dMm / 1000;
 
-        // 2. Vận tốc dòng chảy
-        let area = Math.PI * Math.pow(D_m / 2, 2);
-        velocity = Q_m3s / area;
+        // Công thức Hazen-Williams tính lưu lượng Q (m³/s):
+        // Q = 0.2785 * C * (D^2.63) * ((DeltaH / L)^0.54)
+        const qM3s = 0.2785 * C * Math.pow(dM, 2.63) * Math.pow(deltaH / L, 0.54);
+        const qM3h = qM3s * 3600;
 
-        // 3. Tổn thất thủy lực toàn tuyến = deltaP * 1.09856 (thêm ~10% tổn thất cục bộ)
-        Hf = deltaP * 1.0985585;
+        // Vận tốc dòng chảy v (m/s) = (4 * Q) / (PI * D^2)
+        const v = (4 * qM3s) / (Math.PI * Math.pow(dM, 2));
+
+        // Tổn thất thủy lực toàn tuyến Hf (m)
+        const hf = (11.737 * L * Math.pow(qM3s, 1.852)) / (Math.pow(C, 1.852) * Math.pow(dM, 4.87));
+
+        document.getElementById('res_q_m3h').innerText = qM3h.toFixed(2) + " m³/h";
+        document.getElementById('res_q_m3s').innerText = "(" + qM3s.toFixed(6) + " m³/s)";
+        document.getElementById('res_v').innerText = v.toFixed(3) + " m/s";
+        document.getElementById('res_hf').innerText = hf.toFixed(2) + " m";
     }
 
-    document.getElementById('q_m3s').innerText = Q_m3s.toFixed(3);
-    document.getElementById('q_m3h').innerText = Math.round(Q_m3h);
-    document.getElementById('velocity').innerText = velocity.toFixed(3);
-    document.getElementById('hf').innerText = Hf.toFixed(3);
-}
-
-calculate();
+    // Tự động tính 1 lần ban đầu khi tải trang
+    window.onload = calculateFlowRate;
 </script>
 
 </body>
