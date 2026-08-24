@@ -180,16 +180,16 @@
             font-size: 0.9rem;
         }
 
-        .highlight-main {
+        .highlight-m3s {
             color: #d83b01;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
         }
 
-        .highlight-sub {
+        .highlight-m3h {
             color: #d83b01;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 1rem;
+            font-weight: 700;
         }
     </style>
 </head>
@@ -240,8 +240,8 @@
             <div class="result-item">
                 <span class="result-label">Lưu lượng qua đường ống (Q):</span>
                 <div class="result-value-group">
-                    <span id="res_q_m3h" class="highlight-main">- m³/h</span>
-                    <span id="res_q_m3s" class="highlight-sub">(- m³/s)</span>
+                    <span id="res_q_m3s" class="highlight-m3s">- m³/s</span>
+                    <span id="res_q_m3h" class="highlight-m3h">- m³/h</span>
                 </div>
             </div>
             <div class="result-item">
@@ -267,8 +267,8 @@
         const deltaH = hHead - hTail;
 
         if (dMm <= 0 || L <= 0 || deltaH <= 0) {
+            document.getElementById('res_q_m3s').innerText = "- m³/s";
             document.getElementById('res_q_m3h').innerText = "Không hợp lệ";
-            document.getElementById('res_q_m3s').innerText = "(- m³/s)";
             document.getElementById('res_v').innerText = "- m/s";
             document.getElementById('res_hf').innerText = "- m";
             return;
@@ -276,19 +276,18 @@
 
         const dM = dMm / 1000;
 
-        // Công thức Hazen-Williams tính lưu lượng Q (m³/s):
-        // Q = 0.2785 * C * (D^2.63) * ((DeltaH / L)^0.54)
+        // Công thức Hazen-Williams tính lưu lượng Q (m³/s)
         const qM3s = 0.2785 * C * Math.pow(dM, 2.63) * Math.pow(deltaH / L, 0.54);
         const qM3h = qM3s * 3600;
 
-        // Vận tốc dòng chảy v (m/s) = (4 * Q) / (PI * D^2)
+        // Vận tốc dòng chảy v (m/s)
         const v = (4 * qM3s) / (Math.PI * Math.pow(dM, 2));
 
         // Tổn thất thủy lực toàn tuyến Hf (m)
         const hf = (11.737 * L * Math.pow(qM3s, 1.852)) / (Math.pow(C, 1.852) * Math.pow(dM, 4.87));
 
+        document.getElementById('res_q_m3s').innerText = qM3s.toFixed(6) + " m³/s";
         document.getElementById('res_q_m3h').innerText = qM3h.toFixed(2) + " m³/h";
-        document.getElementById('res_q_m3s').innerText = "(" + qM3s.toFixed(6) + " m³/s)";
         document.getElementById('res_v').innerText = v.toFixed(3) + " m/s";
         document.getElementById('res_hf').innerText = hf.toFixed(2) + " m";
     }
