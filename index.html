@@ -14,8 +14,11 @@
             --input-bg: #f9fbf9;
             --border-color: #c8d6c9;
             --accent-blue: #005a9e;
-            --btn-blue: rgb(0, 112, 192);
             --result-bg: #eef7ee;
+
+            /* Tone màu shade vàng rất nhạt và dịu mắt */
+            --focus-yellow-bg: #fffde6;
+            --focus-yellow-border: #e6b800;
         }
 
         * {
@@ -95,6 +98,7 @@
             text-overflow: ellipsis;
         }
 
+        /* Xóa nút tăng giảm số */
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -113,32 +117,46 @@
             outline: none;
             width: 100%;
             height: 34px;
-            transition: all 0.2s;
+            transition: all 0.2s ease-in-out;
         }
 
+        /* Chỉ ô được chọn (:focus) mới đổi sang shade vàng nhạt và nổi nhẹ */
         input:focus, select:focus {
-            border-color: var(--excel-header-bg);
-            background-color: #fff;
-            box-shadow: 0 0 0 2px rgba(16, 124, 65, 0.15);
+            background-color: var(--focus-yellow-bg);
+            border-color: var(--focus-yellow-border);
+            transform: translateY(-1px);
+            box-shadow: 0 0 0 3px rgba(255, 235, 130, 0.45), 0 3px 8px rgba(0,0,0,0.1);
         }
 
+        /* Nút tính toán 3D đồng bộ màu xanh lá */
         .btn-calc {
             width: 100%;
-            background-color: var(--btn-blue);
+            background: linear-gradient(135deg, #107c41 0%, #0b592e 100%);
             color: #ffffff;
-            border: none;
-            padding: 10px;
-            font-size: 1rem;
+            border: 1px solid #084222;
+            padding: 12px;
+            font-size: 1.05rem;
             font-weight: bold;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
-            margin-top: 12px;
-            margin-bottom: 5px;
-            transition: opacity 0.2s;
+            margin-top: 14px;
+            margin-bottom: 8px;
+            box-shadow: 0 5px 0 #07331a, 0 8px 12px rgba(0,0,0,0.25);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            top: 0;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+        }
+
+        .btn-calc:hover {
+            background: linear-gradient(135deg, #13914c 0%, #0d6937 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #07331a, 0 12px 18px rgba(0,0,0,0.3);
         }
 
         .btn-calc:active {
-            opacity: 0.85;
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #07331a, 0 4px 6px rgba(0,0,0,0.2);
         }
 
         .result-box {
@@ -203,23 +221,23 @@
         <div class="form-grid">
             <div class="form-group">
                 <label for="d_mm">Đường kính ống (mm):</label>
-                <input type="number" id="d_mm" value="200" inputmode="decimal">
+                <input type="number" id="d_mm" value="200" inputmode="decimal" onfocus="this.select()" onchange="calculateFlowRate()">
             </div>
             <div class="form-group">
                 <label for="length">Chiều dài ống L (m):</label>
-                <input type="number" id="length" value="18750" inputmode="decimal">
+                <input type="number" id="length" value="18750" inputmode="decimal" onfocus="this.select()" onchange="calculateFlowRate()">
             </div>
             <div class="form-group">
                 <label for="h_head">Áp lực điểm đầu (m):</label>
-                <input type="number" id="h_head" value="30" inputmode="decimal">
+                <input type="number" id="h_head" value="30" inputmode="decimal" onfocus="this.select()" onchange="calculateFlowRate()">
             </div>
             <div class="form-group">
                 <label for="h_tail">Áp lực điểm cuối (m):</label>
-                <input type="number" id="h_tail" value="15" inputmode="decimal">
+                <input type="number" id="h_tail" value="15" inputmode="decimal" onfocus="this.select()" onchange="calculateFlowRate()">
             </div>
             <div class="form-group" style="grid-column: span 2;">
                 <label for="material">Vật liệu đường ống:</label>
-                <select id="material">
+                <select id="material" onchange="calculateFlowRate()">
                     <option value="140" selected>Ống HDPE (C = 140)</option>
                     <option value="140">Ống PVC (C = 140)</option>
                     <option value="140">Ống Inox (C = 140)</option>
@@ -292,7 +310,6 @@
         document.getElementById('res_hf').innerText = hf.toFixed(2) + " m";
     }
 
-    // Tự động tính 1 lần ban đầu khi tải trang
     window.onload = calculateFlowRate;
 </script>
 
