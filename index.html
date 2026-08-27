@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tính Toán Thủy Lực Đường Ống - 2026</title>
+    <title>Tính Toán Lưu Lượng Nước - 2026</title>
     <style>
         :root {
             --excel-header-bg: #107c41;
@@ -175,30 +175,53 @@
             font-weight: 500;
         }
 
+        .result-value-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+
         .result-value {
             font-weight: 700;
             color: var(--accent-blue);
             font-size: 0.9rem;
         }
 
-        .highlight-loss {
+        .highlight-m3s {
+            color: #d83b01;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .highlight-m3h {
             color: #d83b01;
             font-size: 1rem;
             font-weight: 700;
         }
 
-        .warning-box {
+        .status-box {
             display: none;
             margin-top: 10px;
             padding: 8px 12px;
-            background-color: #fde8e8;
-            border: 1px solid #f8b4b4;
-            border-left: 4px solid #e02424;
-            color: #9b1c1c;
             border-radius: 4px;
             font-size: 0.82rem;
             font-weight: 600;
             line-height: 1.4;
+        }
+
+        .status-safe {
+            background-color: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            border-left: 4px solid #2e7d32;
+            color: #1b5e20;
+        }
+
+        .status-warn {
+            background-color: #fff8e1;
+            border: 1px solid #ffe082;
+            border-left: 4px solid #f57c00;
+            color: #b78103;
         }
 
         .footer {
@@ -222,26 +245,30 @@
 <body>
 
 <div class="container">
-    <div class="header-bar">TÍNH TOÁN TỔN THẤT THỦY LỰC - 2026</div>
+    <div class="header-bar">TÍNH TOÁN LƯU LƯỢNG NƯỚC - 2026</div>
     
     <div class="content">
         <div class="section-title">Dữ Liệu Đầu Vào</div>
         <div class="form-grid">
             <div class="form-group">
-                <label for="d_mm">Đường kính ống (mm):</label>
-                <input type="number" id="d_mm" value="100" inputmode="decimal" class="auto-select" onchange="calculateHydraulics()">
+                <label for="d_mm">Đường kính ống D (mm):</label>
+                <input type="number" id="d_mm" value="100" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
             </div>
             <div class="form-group">
                 <label for="length">Chiều dài ống L (m):</label>
-                <input type="number" id="length" value="18750" inputmode="decimal" class="auto-select" onchange="calculateHydraulics()">
+                <input type="number" id="length" value="18750" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
             </div>
             <div class="form-group">
-                <label for="q_m3h">Lưu lượng Q (m³/h):</label>
-                <input type="number" id="q_m3h" value="34.07" inputmode="decimal" class="auto-select" onchange="calculateHydraulics()">
+                <label for="h_head">Áp lực điểm đầu P1 (m):</label>
+                <input type="number" id="h_head" value="30" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
             </div>
             <div class="form-group">
+                <label for="h_tail">Áp lực điểm cuối P2 (m):</label>
+                <input type="number" id="h_tail" value="15" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
                 <label for="material">Vật liệu đường ống:</label>
-                <select id="material" onchange="calculateHydraulics()">
+                <select id="material" onchange="calculateFlowRate()">
                     <option value="140" selected>Ống HDPE / PVC / Inox (C = 140)</option>
                     <option value="130">Ống gang dẻo mới (C = 130)</option>
                     <option value="120">Ống thép mới (C = 120)</option>
@@ -251,27 +278,25 @@
             </div>
         </div>
 
-        <button class="btn-calc" onclick="calculateHydraulics()">Cập Nhật Tính Toán</button>
+        <button class="btn-calc" onclick="calculateFlowRate()">Cập Nhật Tính Toán</button>
 
         <div class="section-title">Kết Quả Tính Toán</div>
         <div class="result-box">
             <div class="result-item">
+                <span class="result-label">Lưu lượng truyền tải (Q):</span>
+                <div class="result-value-group">
+                    <span id="res_q_m3s" class="highlight-m3s">- m³/s</span>
+                    <span id="res_q_m3h" class="highlight-m3h">- m³/h</span>
+                </div>
+            </div>
+            <div class="result-item">
                 <span class="result-label">Vận tốc dòng chảy (v):</span>
                 <span class="result-value" id="res_v">- m/s</span>
             </div>
-            <div class="result-item">
-                <span class="result-label">Tổn thất thủy lực đơn vị (1km):</span>
-                <span id="res_hf_km" class="highlight-loss">- m/km</span>
-            </div>
-            <div class="result-item">
-                <span class="result-label">Tổn thất toàn tuyến (Hf):</span>
-                <span class="result-value" id="res_hf">- m</span>
-            </div>
         </div>
 
-        <div id="warning_box" class="warning-box">
-            ⚠️ <strong>CẢNH BÁO:</strong> Tổn thất thủy lực đơn vị cao (<span id="warn_val">0</span> m/km ≥ 5 m/km). Cần nâng cỡ ống $D$ hoặc giảm lưu lượng truyền tải!
-        </div>
+        <!-- Trạng thái cảnh báo vận tốc -->
+        <div id="status_box" class="status-box"></div>
     </div>
 
     <div class="footer">
@@ -281,57 +306,94 @@
 </div>
 
 <script>
-    function calculateHydraulics() {
+    function calculateFlowRate() {
         const dMm = parseFloat(document.getElementById('d_mm').value) || 0;
         const L = parseFloat(document.getElementById('length').value) || 0;
-        const qM3h = parseFloat(document.getElementById('q_m3h').value) || 0;
+        const hHead = parseFloat(document.getElementById('h_head').value) || 0;
+        const hTail = parseFloat(document.getElementById('h_tail').value) || 0;
         const C = parseFloat(document.getElementById('material').value) || 140;
 
-        if (dMm <= 0 || L <= 0 || qM3h <= 0) {
+        const deltaH = hHead - hTail;
+
+        if (dMm <= 0 || L <= 0 || deltaH <= 0) {
+            document.getElementById('res_q_m3s').innerText = "- m³/s";
+            document.getElementById('res_q_m3h').innerText = "Không hợp lệ";
             document.getElementById('res_v').innerText = "- m/s";
-            document.getElementById('res_hf').innerText = "- m";
-            document.getElementById('res_hf_km').innerText = "- m/km";
-            document.getElementById('warning_box').style.display = "none";
+            document.getElementById('status_box').style.display = "none";
             return;
         }
 
         const dM = dMm / 1000;
-        const qM3s = qM3h / 3600;
 
-        // Vận tốc dòng chảy v (m/s)
+        // Công thức Hazen-Williams tính Q
+        const qM3s = 0.2785 * C * Math.pow(dM, 2.63) * Math.pow(deltaH / L, 0.54);
+        const qM3h = qM3s * 3600;
+
+        // Vận tốc dòng chảy v
         const v = (4 * qM3s) / (Math.PI * Math.pow(dM, 2));
 
-        // Tổn thất thủy lực trên 1km (m/km) theo Hazen-Williams
-        const hfKm = 10567 * Math.pow(qM3s, 1.852) / (Math.pow(C, 1.852) * Math.pow(dM, 4.87));
-        
-        // Tổn thất thủy lực toàn tuyến (m)
-        const hf = hfKm * (L / 1000);
-
+        document.getElementById('res_q_m3s').innerText = qM3s.toFixed(6) + " m³/s";
+        document.getElementById('res_q_m3h').innerText = qM3h.toFixed(2) + " m³/h";
         document.getElementById('res_v').innerText = v.toFixed(3) + " m/s";
-        document.getElementById('res_hf_km').innerText = hfKm.toFixed(2) + " m/km";
-        document.getElementById('res_hf').innerText = hf.toFixed(2) + " m";
 
-        // Cảnh báo khi tổn thất đơn vị >= 5 m/km
-        const warningBox = document.getElementById('warning_box');
-        if (hfKm >= 5.0) {
-            document.getElementById('warn_val').innerText = hfKm.toFixed(2);
-            warningBox.style.display = "block";
+        // Tra vận tốc kinh tế chuẩn theo 6 dải đường kính D
+        let vMin = 0.5, vMax = 0.8;
+
+        if (dMm < 75) {
+            vMin = 0.5; vMax = 0.8;
+        } else if (dMm <= 150) {
+            vMin = 0.7; vMax = 1.0;
+        } else if (dMm <= 300) {
+            vMin = 0.9; vMax = 1.2;
+        } else if (dMm <= 500) {
+            vMin = 1.1; vMax = 1.4;
+        } else if (dMm <= 800) {
+            vMin = 1.3; vMax = 1.6;
         } else {
-            warningBox.style.display = "none";
+            vMin = 1.5; vMax = 1.8;
+        }
+
+        const statusBox = document.getElementById('status_box');
+        statusBox.style.display = "block";
+
+        if (v >= vMin && v <= vMax) {
+            statusBox.className = "status-box status-safe";
+            statusBox.innerHTML = `✅ <strong>AN TOÀN:</strong> Vận tốc ${v.toFixed(3)} m/s nằm trong khoảng kinh tế tối ưu cho ống D${dMm} (${vMin} - ${vMax} m/s).`;
+        } else if (v < vMin) {
+            statusBox.className = "status-box status-warn";
+            statusBox.innerHTML = `⚠️ <strong>CẢNH BÁO VẬN TỐC THẤP:</strong> Vận tốc ${v.toFixed(3)} m/s nhỏ hơn dải kinh tế (mức tối thiểu ${vMin} m/s). Nguy cơ gây lắng cặn trên tuyến ống!`;
+        } else {
+            statusBox.className = "status-box status-warn";
+            statusBox.innerHTML = `⚠️ <strong>CẢNH BÁO VẬN TỐC CAO:</strong> Vận tốc ${v.toFixed(3)} m/s vượt quá dải kinh tế (mức tối đa ${vMax} m/s). Nguy cơ tăng tổn thất áp lực và xói mòn ống!`;
         }
     }
 
-    // Tối ưu thao tác bôi đen toàn bộ số khi click/chạm ô nhập liệu
+    // Tự động bôi đen toàn bộ số khi chọn ô nhập liệu
     document.querySelectorAll('.auto-select').forEach(input => {
+        let isFocused = false;
+
         input.addEventListener('focus', function() {
-            this.select();
+            if (!isFocused) {
+                setTimeout(() => {
+                    this.select();
+                    this.setSelectionRange(0, 9999);
+                }, 50);
+                isFocused = true;
+            }
         });
-        input.addEventListener('click', function() {
-            this.select();
+
+        input.addEventListener('blur', function() {
+            isFocused = false;
+        });
+
+        input.addEventListener('mouseup', function(e) {
+            if (isFocused) {
+                e.preventDefault();
+            }
         });
     });
 
-    window.onload = calculateHydraulics;
+    window.onload = calculateFlowRate;
 </script>
 
 </body>
