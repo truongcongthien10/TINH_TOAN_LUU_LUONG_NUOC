@@ -17,6 +17,7 @@
             --result-bg: #eef7ee;
             --focus-yellow-bg: #fffde6;
             --focus-yellow-border: #e6b800;
+            --suggest-color: #6b21a8; /* Màu tím nổi bật cho Đề xuất */
         }
 
         * {
@@ -176,7 +177,7 @@
         }
 
         .highlight-rec {
-            color: #107c41;
+            color: var(--suggest-color);
             font-size: 0.95rem;
             font-weight: 700;
         }
@@ -185,6 +186,18 @@
             color: #d83b01;
             font-size: 0.95rem;
             font-weight: 700;
+        }
+
+        .suggest-divider {
+            margin-top: 8px;
+            margin-bottom: 4px;
+            padding-top: 6px;
+            border-top: 2px dashed #a3d1a6;
+            font-weight: 700;
+            color: var(--suggest-color);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .status-tag {
@@ -278,17 +291,11 @@
 
         <button class="btn-calc" onclick="calculateFlowRate()">Cập Nhật Tính Toán</button>
 
-        <div class="section-title">KẾT QUẢ ĐỐI CHIẾU & TÍNH TOÁN</div>
+        <!-- ĐỔI TÊN TIÊU ĐỀ THÀNH KẾT QUẢ TÍNH TOÁN -->
+        <div class="section-title">KẾT QUẢ TÍNH TOÁN</div>
         <div class="result-box">
+            <!-- ĐƯA CÁC DÒNG BÔI VÀNG LÊN TRÊN -->
             <div class="result-item">
-                <span class="result-label">Lưu lượng đề nghị (Q kinh tế):</span>
-                <span id="res_q_rec" class="highlight-rec">- m³/h</span>
-            </div>
-            <div class="result-item">
-                <span class="result-label">Vận tốc kinh tế chuẩn:</span>
-                <span id="res_v_rec" style="font-weight: 600;">- m/s</span>
-            </div>
-            <div class="result-item" style="margin-top: 4px; border-top: 1px solid #c8d6c9; padding-top: 8px;">
                 <span class="result-label">Lưu lượng tối đa (Q max theo ΔH):</span>
                 <span id="res_q_max" class="highlight-max">- m³/h</span>
             </div>
@@ -299,6 +306,19 @@
             <div class="result-item">
                 <span class="result-label">Đánh giá trạng thái dòng chảy:</span>
                 <span id="res_status" class="status-tag status-ok">-</span>
+            </div>
+
+            <!-- THÊM DÒNG ĐỀ XUẤT (Ô BÔI ĐEN) -->
+            <div class="suggest-divider">📌 ĐỀ XUẤT KINH TẾ</div>
+
+            <!-- ĐƯA 2 GIÁ TRỊ TRONG Ô BÔI ĐỎ XUỐNG BÊN DƯỚI -->
+            <div class="result-item">
+                <span class="result-label">Lưu lượng đề nghị (Q kinh tế):</span>
+                <span id="res_q_rec" class="highlight-rec">- m³/h</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Vận tốc kinh tế chuẩn:</span>
+                <span id="res_v_rec" style="font-weight: 600; color: var(--suggest-color);">- m/s</span>
             </div>
         </div>
 
