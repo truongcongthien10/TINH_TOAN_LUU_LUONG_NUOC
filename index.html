@@ -172,33 +172,30 @@
 
         .result-label {
             color: #2e4d32;
-            font-weight: 500;
+            font-weight: 600;
         }
 
-        .result-value-group {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 2px;
-        }
-
-        .result-value {
+        .highlight-rec {
+            color: #107c41;
+            font-size: 0.95rem;
             font-weight: 700;
-            color: var(--accent-blue);
-            font-size: 0.9rem;
         }
 
-        .highlight-m3s {
+        .highlight-max {
             color: #d83b01;
             font-size: 0.95rem;
             font-weight: 700;
         }
 
-        .highlight-m3h {
-            color: #d83b01;
-            font-size: 1rem;
-            font-weight: 700;
+        .status-tag {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: bold;
         }
+
+        .status-ok { background-color: #d4edda; color: #155724; }
+        .status-warn { background-color: #f8d7da; color: #721c24; }
 
         .v-table {
             width: 100%;
@@ -253,7 +250,7 @@
         <div class="form-grid">
             <div class="form-group">
                 <label for="l_m">Chiều dài ống L (m):</label>
-                <input type="number" id="l_m" value="1500" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
+                <input type="number" id="l_m" value="500" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
             </div>
             <div class="form-group">
                 <label for="d_mm">Đường kính ống D (mm):</label>
@@ -281,18 +278,27 @@
 
         <button class="btn-calc" onclick="calculateFlowRate()">Cập Nhật Tính Toán</button>
 
-        <div class="section-title">KẾT QUẢ TÍNH TOÁN</div>
+        <div class="section-title">KẾT QUẢ ĐỐI CHIẾU & TÍNH TOÁN</div>
         <div class="result-box">
             <div class="result-item">
-                <span class="result-label">Lưu lượng truyền tải (Q):</span>
-                <div class="result-value-group">
-                    <span id="res_q_m3s" class="highlight-m3s">- m³/s</span>
-                    <span id="res_q_m3h" class="highlight-m3h">- m³/h</span>
-                </div>
+                <span class="result-label">Lưu lượng đề nghị (Q kinh tế):</span>
+                <span id="res_q_rec" class="highlight-rec">- m³/h</span>
             </div>
             <div class="result-item">
-                <span class="result-label">Vận tốc dòng chảy (v):</span>
-                <span class="result-value" id="res_v">- m/s</span>
+                <span class="result-label">Vận tốc kinh tế chuẩn:</span>
+                <span id="res_v_rec" style="font-weight: 600;">- m/s</span>
+            </div>
+            <div class="result-item" style="margin-top: 4px; border-top: 1px solid #c8d6c9; padding-top: 8px;">
+                <span class="result-label">Lưu lượng tối đa (Q max theo ΔH):</span>
+                <span id="res_q_max" class="highlight-max">- m³/h</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Vận tốc dòng chảy tối đa:</span>
+                <span id="res_v_max" style="font-weight: 600;">- m/s</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Đánh giá trạng thái dòng chảy:</span>
+                <span id="res_status" class="status-tag status-ok">-</span>
             </div>
         </div>
 
@@ -336,43 +342,63 @@
         const deltaH = p1 - p2;
 
         if (dMm <= 0 || lM <= 0 || deltaH <= 0) {
-            document.getElementById('res_q_m3s').innerText = "- m³/s";
-            document.getElementById('res_q_m3h').innerText = "Chênh áp phải > 0";
-            document.getElementById('res_v').innerText = "- m/s";
+            document.getElementById('res_q_rec').innerText = "- m³/h";
+            document.getElementById('res_v_rec').innerText = "- m/s";
+            document.getElementById('res_q_max').innerText = "- m³/h";
+            document.getElementById('res_v_max').innerText = "- m/s";
+            document.getElementById('res_status').innerText = "Chênh áp P1-P2 phải > 0";
+            document.getElementById('res_status').className = "status-tag status-warn";
             return;
         }
 
         const dM = dMm / 1000;
-        const iUnit = deltaH / lM;
+        const area = (Math.PI * Math.pow(dM, 2)) / 4;
 
-        // Công thức Hazen-Williams
-        const qM3s = 0.2785 * C * Math.pow(dM, 2.63) * Math.pow(iUnit, 0.54);
-        const qM3h = qM3s * 3600;
-
-        // Vận tốc dòng chảy v
-        const v = (4 * qM3s) / (Math.PI * Math.pow(dM, 2));
-
-        document.getElementById('res_q_m3s').innerText = qM3s.toFixed(6) + " m³/s";
-        document.getElementById('res_q_m3h').innerText = qM3h.toFixed(2) + " m³/h";
-        document.getElementById('res_v').innerText = v.toFixed(3) + " m/s";
-
-        let activeRowId = "row_1";
-
+        // 1. Xác định Vận tốc kinh tế và Tính Lưu lượng Kinh tế (Q đề nghị)
+        let vMin = 0.5, vMax = 0.8, activeRowId = "row_1";
         if (dMm < 75) {
-            activeRowId = "row_1";
+            vMin = 0.5; vMax = 0.8; activeRowId = "row_1";
         } else if (dMm <= 150) {
-            activeRowId = "row_2";
+            vMin = 0.7; vMax = 1.0; activeRowId = "row_2";
         } else if (dMm <= 300) {
-            activeRowId = "row_3";
+            vMin = 0.9; vMax = 1.2; activeRowId = "row_3";
         } else if (dMm <= 500) {
-            activeRowId = "row_4";
+            vMin = 1.1; vMax = 1.4; activeRowId = "row_4";
         } else if (dMm <= 800) {
-            activeRowId = "row_5";
+            vMin = 1.3; vMax = 1.6; activeRowId = "row_5";
         } else {
-            activeRowId = "row_6";
+            vMin = 1.5; vMax = 1.8; activeRowId = "row_6";
         }
 
         document.getElementById(activeRowId).className = "active-range";
+
+        const qRecMinM3h = vMin * area * 3600;
+        const qRecMaxM3h = vMax * area * 3600;
+
+        document.getElementById('res_v_rec').innerText = `${vMin.toFixed(1)} – ${vMax.toFixed(1)} m/s`;
+        document.getElementById('res_q_rec').innerText = `${qRecMinM3h.toFixed(1)} – ${qRecMaxM3h.toFixed(1)} m³/h`;
+
+        // 2. Tính Lưu lượng Tối đa (Q max) theo Hazen-Williams
+        const iUnit = deltaH / lM;
+        const qMaxM3s = 0.2785 * C * Math.pow(dM, 2.63) * Math.pow(iUnit, 0.54);
+        const qMaxM3h = qMaxM3s * 3600;
+        const vMaxActual = qMaxM3s / area;
+
+        document.getElementById('res_q_max').innerText = `${qMaxM3h.toFixed(2)} m³/h`;
+        document.getElementById('res_v_max').innerText = `${vMaxActual.toFixed(2)} m/s`;
+
+        // 3. Đánh giá trạng thái dòng chảy
+        const statusEl = document.getElementById('res_status');
+        if (vMaxActual > vMax) {
+            statusEl.innerText = "CẢNH BÁO: Vận tốc vượt ngưỡng kinh tế";
+            statusEl.className = "status-tag status-warn";
+        } else if (vMaxActual < vMin) {
+            statusEl.innerText = "LƯU Ý: Vận tốc thấp (Dễ lắng cặn)";
+            statusEl.className = "status-tag status-warn";
+        } else {
+            statusEl.innerText = "AN TOÀN: Đạt dải vận tốc kinh tế";
+            statusEl.className = "status-tag status-ok";
+        }
     }
 
     document.querySelectorAll('.auto-select').forEach(input => {
