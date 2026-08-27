@@ -17,7 +17,7 @@
             --result-bg: #eef7ee;
             --focus-yellow-bg: #fffde6;
             --focus-yellow-border: #e6b800;
-            --suggest-color: #6b21a8; /* Màu tím nổi bật cho Đề xuất */
+            --suggest-color: #6b21a8;
         }
 
         * {
@@ -200,11 +200,22 @@
             letter-spacing: 0.5px;
         }
 
+        /* Khối hiển thị cảnh báo căn giữa */
+        .status-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px dashed #d0e4d2;
+        }
+
         .status-tag {
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
             font-weight: bold;
+            text-align: center;
+            width: 100%;
         }
 
         .status-ok { background-color: #d4edda; color: #155724; }
@@ -291,10 +302,8 @@
 
         <button class="btn-calc" onclick="calculateFlowRate()">Cập Nhật Tính Toán</button>
 
-        <!-- ĐỔI TÊN TIÊU ĐỀ THÀNH KẾT QUẢ TÍNH TOÁN -->
         <div class="section-title">KẾT QUẢ TÍNH TOÁN</div>
         <div class="result-box">
-            <!-- ĐƯA CÁC DÒNG BÔI VÀNG LÊN TRÊN -->
             <div class="result-item">
                 <span class="result-label">Lưu lượng tối đa (Q max theo ΔH):</span>
                 <span id="res_q_max" class="highlight-max">- m³/h</span>
@@ -303,15 +312,14 @@
                 <span class="result-label">Vận tốc dòng chảy tối đa:</span>
                 <span id="res_v_max" style="font-weight: 600;">- m/s</span>
             </div>
-            <div class="result-item">
-                <span class="result-label">Đánh giá trạng thái dòng chảy:</span>
+            
+            <!-- ĐƯA DÒNG CẢNH BÁO VÀO GIỮA ĐỀU 2 BÊN -->
+            <div class="status-container">
                 <span id="res_status" class="status-tag status-ok">-</span>
             </div>
 
-            <!-- THÊM DÒNG ĐỀ XUẤT (Ô BÔI ĐEN) -->
             <div class="suggest-divider">📌 ĐỀ XUẤT KINH TẾ</div>
 
-            <!-- ĐƯA 2 GIÁ TRỊ TRONG Ô BÔI ĐỎ XUỐNG BÊN DƯỚI -->
             <div class="result-item">
                 <span class="result-label">Lưu lượng đề nghị (Q kinh tế):</span>
                 <span id="res_q_rec" class="highlight-rec">- m³/h</span>
