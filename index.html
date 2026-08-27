@@ -120,7 +120,7 @@
             transition: all 0.2s ease-in-out;
         }
 
-        /* Chỉ ô được chọn (:focus) mới đổi sang shade vàng nhạt và nổi nhẹ */
+        /* Ô chọn (:focus) đổi màu vàng nhạt dịu mắt */
         input:focus, select:focus {
             background-color: var(--focus-yellow-bg);
             border-color: var(--focus-yellow-border);
@@ -128,7 +128,6 @@
             box-shadow: 0 0 0 3px rgba(255, 235, 130, 0.45), 0 3px 8px rgba(0,0,0,0.1);
         }
 
-        /* Nút tính toán 3D đồng bộ màu xanh lá */
         .btn-calc {
             width: 100%;
             background: linear-gradient(135deg, #107c41 0%, #0b592e 100%);
@@ -210,7 +209,6 @@
             font-weight: 700;
         }
 
-        /* Khối cảnh báo tổn thất lớn */
         .warning-box {
             display: none;
             margin-top: 10px;
@@ -225,7 +223,6 @@
             line-height: 1.4;
         }
 
-        /* Footer chứa thông tin bản quyền */
         .footer {
             display: flex;
             justify-content: space-between;
@@ -254,19 +251,19 @@
         <div class="form-grid">
             <div class="form-group">
                 <label for="d_mm">Đường kính ống (mm):</label>
-                <input type="number" id="d_mm" value="200" inputmode="decimal" onfocus="this.select()" onchange="calculateFlowRate()">
+                <input type="number" id="d_mm" value="100" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
             </div>
             <div class="form-group">
                 <label for="length">Chiều dài ống L (m):</label>
-                <input type="number" id="length" value="18750" inputmode="decimal" onfocus="this.select()" onchange="calculateFlowRate()">
+                <input type="number" id="length" value="18750" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
             </div>
             <div class="form-group">
                 <label for="h_head">Áp lực điểm đầu (m):</label>
-                <input type="number" id="h_head" value="30" inputmode="decimal" onfocus="this.select()" onchange="calculateFlowRate()">
+                <input type="number" id="h_head" value="30" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
             </div>
             <div class="form-group">
                 <label for="h_tail">Áp lực điểm cuối (m):</label>
-                <input type="number" id="h_tail" value="15" inputmode="decimal" onfocus="this.select()" onchange="calculateFlowRate()">
+                <input type="number" id="h_tail" value="15" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
             </div>
             <div class="form-group" style="grid-column: span 2;">
                 <label for="material">Vật liệu đường ống:</label>
@@ -342,7 +339,7 @@
 
         const dM = dMm / 1000;
 
-        // Công thức Hazen-Williams tính lưu lượng Q (m³/s)
+        // Công thức Hazen-Williams tính lưu lượng Q (m³/s) dựa trên tổn thất deltaH và chiều dài L
         const qM3s = 0.2785 * C * Math.pow(dM, 2.63) * Math.pow(deltaH / L, 0.54);
         const qM3h = qM3s * 3600;
 
@@ -350,9 +347,9 @@
         const v = (4 * qM3s) / (Math.PI * Math.pow(dM, 2));
 
         // Tổn thất thủy lực toàn tuyến Hf (m)
-        const hf = (11.737 * L * Math.pow(qM3s, 1.852)) / (Math.pow(C, 1.852) * Math.pow(dM, 4.87));
+        const hf = deltaH;
         
-        // Tổn thất thủy lực trên 1 km (m/km)
+        // Tổn thất thủy lực đơn vị trên 1 km (m/km)
         const hfKm = (hf / L) * 1000;
 
         document.getElementById('res_q_m3s').innerText = qM3s.toFixed(6) + " m³/s";
@@ -361,7 +358,7 @@
         document.getElementById('res_hf').innerText = hf.toFixed(2) + " m";
         document.getElementById('res_hf_km').innerText = hfKm.toFixed(2) + " m/km";
 
-        // Kiểm tra điều kiện cảnh báo tổn thất >= 5m/km
+        // Cảnh báo khi tổn thất đơn vị >= 5m/km
         const warningBox = document.getElementById('warning_box');
         if (hfKm >= 5.0) {
             document.getElementById('warn_val').innerText = hfKm.toFixed(2);
@@ -370,6 +367,16 @@
             warningBox.style.display = "none";
         }
     }
+
+    // Tự động bôi đen toàn bộ nội dung khi click/focus vào ô nhập liệu (khắc phục lỗi trên di động & desktop)
+    document.querySelectorAll('.auto-select').forEach(input => {
+        input.addEventListener('focus', function() {
+            setTimeout(() => this.select(), 50);
+        });
+        input.addEventListener('mouseup', function(e) {
+            e.preventDefault();
+        });
+    });
 
     window.onload = calculateFlowRate;
 </script>
