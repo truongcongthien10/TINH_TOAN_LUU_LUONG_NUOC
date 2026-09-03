@@ -200,7 +200,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Khối hiển thị cảnh báo căn giữa */
         .status-container {
             display: flex;
             justify-content: center;
@@ -276,27 +275,31 @@
                 <label for="l_m">Chiều dài ống L (m):</label>
                 <input type="number" id="l_m" value="500" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
             </div>
+
             <div class="form-group">
-                <label for="d_mm">Đường kính ống D (mm):</label>
-                <input type="number" id="d_mm" value="100" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
+                <label for="material">Vật liệu đường ống:</label>
+                <select id="material" onchange="updatePipeDiameters()">
+                    <option value="hdpe" data-c="140" selected>Ống HDPE / PVC / Inox (C = 140)</option>
+                    <option value="di" data-c="130">Ống gang dẻo mới (C = 130)</option>
+                    <option value="steel" data-c="120">Ống thép mới (C = 120)</option>
+                    <option value="ci" data-c="110">Ống gang xám (C = 110)</option>
+                    <option value="old_steel" data-c="90">Ống thép cũ (C = 90)</option>
+                </select>
             </div>
+
+            <div class="form-group">
+                <label for="d_mm">Đường kính D (mm):</label>
+                <select id="d_mm" onchange="calculateFlowRate()"></select>
+            </div>
+
             <div class="form-group">
                 <label for="p1_m">Áp lực điểm đầu P1 (m):</label>
                 <input type="number" id="p1_m" value="30" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
             </div>
+            
             <div class="form-group">
                 <label for="p2_m">Áp lực điểm cuối P2 (m):</label>
-                <input type="number" id="p2_m" value="15" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
-            </div>
-            <div class="form-group" style="grid-column: span 2;">
-                <label for="material">Vật liệu đường ống:</label>
-                <select id="material" onchange="calculateFlowRate()">
-                    <option value="140" selected>Ống HDPE / PVC / Inox (C = 140)</option>
-                    <option value="130">Ống gang dẻo mới (C = 130)</option>
-                    <option value="120">Ống thép mới (C = 120)</option>
-                    <option value="110">Ống gang xám (C = 110)</option>
-                    <option value="90">Ống thép cũ (C = 90)</option>
-                </select>
+                <input type="number" id="p2_m" value="10" inputmode="decimal" class="auto-select" onchange="calculateFlowRate()">
             </div>
         </div>
 
@@ -313,7 +316,6 @@
                 <span id="res_v_max" style="font-weight: 600;">- m/s</span>
             </div>
             
-            <!-- ĐƯA DÒNG CẢNH BÁO VÀO GIỮA ĐỀU 2 BÊN -->
             <div class="status-container">
                 <span id="res_status" class="status-tag status-ok">-</span>
             </div>
@@ -356,12 +358,67 @@
 </div>
 
 <script>
+    const pipeDatabase = {
+        hdpe: [
+            { dn: "DN63", id: 55.4 }, { dn: "DN75", id: 66.0 }, { dn: "DN90", id: 79.2 },
+            { dn: "DN110", id: 96.8 }, { dn: "DN160", id: 141.0 }, { dn: "DN200", id: 176.2 },
+            { dn: "DN225", id: 198.2 }, { dn: "DN250", id: 220.4 }, { dn: "DN280", id: 246.8 },
+            { dn: "DN315", id: 277.6 }, { dn: "DN355", id: 312.8 }, { dn: "DN400", id: 352.6 },
+            { dn: "DN450", id: 396.6 }, { dn: "DN500", id: 440.8 }, { dn: "DN630", id: 555.4 }
+        ],
+        di: [
+            { dn: "DN100", id: 104.0 }, { dn: "DN150", id: 156.0 }, { dn: "DN200", id: 207.0 },
+            { dn: "DN250", id: 258.0 }, { dn: "DN300", id: 310.0 }, { dn: "DN350", id: 360.0 },
+            { dn: "DN400", id: 412.0 }, { dn: "DN450", id: 462.0 }, { dn: "DN500", id: 514.0 },
+            { dn: "DN600", id: 616.0 }, { dn: "DN700", id: 718.0 }, { dn: "DN800", id: 820.0 }
+        ],
+        steel: [
+            { dn: "DN50 (2\")", id: 52.5 }, { dn: "DN80 (3\")", id: 77.9 }, { dn: "DN100 (4\")", id: 102.3 },
+            { dn: "DN150 (6\")", id: 154.1 }, { dn: "DN200 (8\")", id: 202.7 }, { dn: "DN250 (10\")", id: 254.5 },
+            { dn: "DN300 (12\")", id: 304.8 }, { dn: "DN350 (14\")", id: 336.6 }, { dn: "DN400 (16\")", id: 387.4 }
+        ],
+        ci: [
+            { dn: "DN100", id: 100.0 }, { dn: "DN150", id: 150.0 }, { dn: "DN200", id: 200.0 },
+            { dn: "DN250", id: 250.0 }, { dn: "DN300", id: 300.0 }, { dn: "DN400", id: 400.0 }
+        ],
+        old_steel: [
+            { dn: "DN100", id: 100.0 }, { dn: "DN150", id: 150.0 }, { dn: "DN200", id: 200.0 },
+            { dn: "DN250", id: 250.0 }, { dn: "DN300", id: 300.0 }, { dn: "DN400", id: 400.0 }
+        ]
+    };
+
+    function updatePipeDiameters() {
+        const materialSelect = document.getElementById('material');
+        const selectedMaterial = materialSelect.value;
+        const dSelect = document.getElementById('d_mm');
+        dSelect.innerHTML = '';
+
+        const pipes = pipeDatabase[selectedMaterial] || [];
+        pipes.forEach((pipe) => {
+            const option = document.createElement('option');
+            option.value = pipe.id;
+            option.textContent = `${pipe.dn} (Di = ${pipe.id} mm)`;
+            if (pipe.dn.includes("200")) {
+                option.selected = true;
+            }
+            dSelect.appendChild(option);
+        });
+
+        if (!dSelect.value && dSelect.options.length > 0) {
+            dSelect.selectedIndex = 0;
+        }
+
+        calculateFlowRate();
+    }
+
     function calculateFlowRate() {
         const dMm = parseFloat(document.getElementById('d_mm').value) || 0;
         const lM = parseFloat(document.getElementById('l_m').value) || 0;
         const p1 = parseFloat(document.getElementById('p1_m').value) || 0;
         const p2 = parseFloat(document.getElementById('p2_m').value) || 0;
-        const C = parseFloat(document.getElementById('material').value) || 140;
+        
+        const materialSelect = document.getElementById('material');
+        const C = parseFloat(materialSelect.options[materialSelect.selectedIndex].getAttribute('data-c')) || 140;
 
         for (let i = 1; i <= 6; i++) {
             document.getElementById('row_' + i).className = "";
@@ -382,7 +439,6 @@
         const dM = dMm / 1000;
         const area = (Math.PI * Math.pow(dM, 2)) / 4;
 
-        // 1. Xác định Vận tốc kinh tế và Tính Lưu lượng Kinh tế (Q đề nghị)
         let vMin = 0.5, vMax = 0.8, activeRowId = "row_1";
         if (dMm < 75) {
             vMin = 0.5; vMax = 0.8; activeRowId = "row_1";
@@ -406,7 +462,6 @@
         document.getElementById('res_v_rec').innerText = `${vMin.toFixed(1)} – ${vMax.toFixed(1)} m/s`;
         document.getElementById('res_q_rec').innerText = `${qRecMinM3h.toFixed(1)} – ${qRecMaxM3h.toFixed(1)} m³/h`;
 
-        // 2. Tính Lưu lượng Tối đa (Q max) theo Hazen-Williams
         const iUnit = deltaH / lM;
         const qMaxM3s = 0.2785 * C * Math.pow(dM, 2.63) * Math.pow(iUnit, 0.54);
         const qMaxM3h = qMaxM3s * 3600;
@@ -415,7 +470,6 @@
         document.getElementById('res_q_max').innerText = `${qMaxM3h.toFixed(2)} m³/h`;
         document.getElementById('res_v_max').innerText = `${vMaxActual.toFixed(2)} m/s`;
 
-        // 3. Đánh giá trạng thái dòng chảy
         const statusEl = document.getElementById('res_status');
         if (vMaxActual > vMax) {
             statusEl.innerText = "CẢNH BÁO: Vận tốc vượt ngưỡng kinh tế";
@@ -453,7 +507,9 @@
         });
     });
 
-    window.onload = calculateFlowRate;
+    window.onload = function() {
+        updatePipeDiameters();
+    };
 </script>
 
 </body>
