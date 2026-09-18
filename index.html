@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tính Toán Lưu Lượng Qua Đường Ống - 2026</title>
+    <title>Tính Toán Lưu Lượng Qua Đường Ống - HueWACO</title>
     <style>
         :root {
             --excel-header-bg: #107c41;
@@ -245,7 +245,6 @@
             color: #d83b01;
         }
 
-        /* Footer Copyright đơn giản */
         .footer-copyright {
             margin-top: 15px;
             padding-top: 8px;
@@ -260,7 +259,7 @@
 <body>
 
 <div class="container">
-    <div class="header-bar">TÍNH TOÁN LƯU LƯỢNG QUA ĐƯỜNG ỐNG - 2026</div>
+    <div class="header-bar">TÍNH TOÁN LƯU LƯỢNG QUA ĐƯỜNG ỐNG - HueWACO</div>
     
     <div class="content">
         <div class="section-title">DỮ LIỆU ĐẦU VÀO (TÍNH TOÁN)</div>
@@ -455,8 +454,8 @@
         document.getElementById('res_v_rec').innerText = `${vMin.toFixed(1)} – ${vMax.toFixed(1)} m/s`;
         document.getElementById('res_q_rec').innerText = `${qRecMinM3h.toFixed(1)} – ${qRecMaxM3h.toFixed(1)} m³/h`;
 
-        const iUnit = deltaH / lM;
-        const qMaxM3s = 0.2785 * C * Math.pow(dM, 2.63) * Math.pow(iUnit, 0.54);
+        // Áp dụng Hazen-Williams SI gốc chuẩn xác (hằng số 11.737)
+        const qMaxM3s = Math.pow((deltaH * Math.pow(C, 1.852) * Math.pow(dM, 4.87)) / (11.737 * lM), 1 / 1.852);
         const qMaxM3h = qMaxM3s * 3600;
         const vMaxActual = qMaxM3s / area;
 
